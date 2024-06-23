@@ -1,3 +1,4 @@
+# -- browser.py
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 
