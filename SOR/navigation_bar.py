@@ -1,8 +1,9 @@
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit
-from PyQt5.QtCore import QUrl, QSize
+from PyQt5.QtCore import QUrl, QSize, QTimer
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 class NavigationBar(QToolBar):
 
@@ -46,6 +47,7 @@ class NavigationBar(QToolBar):
         self.url_bar.setPlaceholderText("sor will never follow you")
         self.url_bar.returnPressed.connect(self.navigate_to_url) # search the url bar when return pressed
         self.url_bar.setFixedHeight(24)  # Set the height of the URL bar
+        self.browser.urlChanged.connect(self.update_urlbar) # updaate url bar when the page is updated
         self.url_bar.setFixedWidth(1300)  # Set the height of the URL bar
         self.addWidget(self.url_bar)
 
@@ -67,6 +69,41 @@ class NavigationBar(QToolBar):
         else:
             # Treat the input as a search query
             return QUrl(f"https://www.google.com/search?q={text.replace(' ', '+')}")
+        
+    def update_urlbar(self, q):
+        if q.toString() == "https://www.google.com/":
+            self.url_bar.setText("")
+            self.url_bar.setPlaceholderText("sor will never follow you")
+        else:
+            self.url_bar.setText(q.toString())
+            self.setup_url_message_timer()
+            self.setup_delay_timer()
 
+
+    def setup_delay_timer(self):
+        self.delay_timer = QTimer(self)
+        self.delay_timer.setSingleShot(True)
+        self.delay_timer.timeout.connect(self.setup_url_revert_timer)
+        self.delay_timer.start(2000)
+        
     def open_bookmarks(self):
         print("Bookmarks button clicked")
+
+    def setup_url_message_timer(self):
+        self.url_message_timer = QTimer(self)
+        self.url_message_timer.timeout.connect(self.display_url_message)
+        self.url_message_timer.start(10000)
+    
+    def display_url_message(self):
+        self.url_bar.setText("")
+        self.url_bar.setPlaceholderText("sor will never follow you")
+    
+    def setup_url_revert_timer(self):
+        self.url_revert_timer = QTimer(self)
+        self.url_revert_timer.timeout.connect(self.revert_url_message)
+        self.url_revert_timer.start(10000)
+    
+    def revert_url_message(self):
+        current_url = self.browser.url().toString()
+        self.url_bar.setText(current_url)
+
