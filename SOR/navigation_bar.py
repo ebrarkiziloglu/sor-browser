@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QAction, QToolBar
-from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit
+from PyQt5.QtCore import QUrl, pyqtSignal
 from PyQt5.QtGui import QIcon
 
 
@@ -29,6 +29,10 @@ class NavigationBar(QToolBar):
         home_button = QAction(QIcon('icons/home.png'), 'Home', self)
         home_button.triggered.connect(self.navigate_home)
         self.addAction(home_button)
+
+        url_bar = QLineEdit('UrlBar', self)
+        self.addWidget(url_bar)
+
 
     def navigate_home(self):
         self.browser.setUrl(QUrl("http://www.google.com"))
