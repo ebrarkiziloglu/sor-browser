@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from SOR.browser import Browser
+from browser import Browser
+from navigation_bar import NavigationBar
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -10,6 +11,10 @@ class MainWindow(QMainWindow):
 
         self.browser = Browser()
         self.setCentralWidget(self.browser)
+
+        navigation_bar = NavigationBar(self.browser)
+        self.addToolBar(navigation_bar)
+        self.showMaximized()
 
 def main():
     app = QApplication(sys.argv)
