@@ -48,6 +48,7 @@ class NavigationBar(QToolBar):
         self.url_bar.returnPressed.connect(self.navigate_to_url) # search the url bar when return pressed
         self.url_bar.setFixedHeight(24)  # Set the height of the URL bar
         self.browser.urlChanged.connect(self.update_urlbar) # updaate url bar when the page is updated
+        self.url_bar.setFixedWidth(1300)  # Set the height of the URL bar
         self.addWidget(self.url_bar)
 
     def navigate_home(self):
