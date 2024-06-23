@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit
-from PyQt5.QtCore import QUrl, QSize, QTimer
+from PyQt5.QtCore import QUrl, QSize, QTimer, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
@@ -43,12 +43,15 @@ class NavigationBar(QToolBar):
         self.addAction(bookmarks_button)
 
         # URL bar
-        self.url_bar = QLineEdit('',self)
+        self.url_bar = QLineEdit('', self)
         self.url_bar.setPlaceholderText("sor will never follow you")
-        self.url_bar.returnPressed.connect(self.navigate_to_url) # search the url bar when return pressed
+        self.url_bar.returnPressed.connect(self.navigate_to_url)  # search the url bar when return pressed
         self.url_bar.setFixedHeight(24)  # Set the height of the URL bar
-        self.browser.urlChanged.connect(self.update_urlbar) # updaate url bar when the page is updated
-        self.url_bar.setFixedWidth(1300)  # Set the height of the URL bar
+        self.browser.urlChanged.connect(self.update_urlbar)  # update url bar when the page is updated
+        self.url_bar.setFixedWidth(1300)  # Set the width of the URL bar
+        self.url_bar.setAlignment(Qt.AlignCenter)  # Center align the URL text initially
+        self.url_bar.focusInEvent = self.focus_in_event  # Override focus in event
+        self.url_bar.focusOutEvent = self.focus_out_event  # Override focus out event
         self.addWidget(self.url_bar)
 
     def navigate_home(self):
@@ -57,7 +60,8 @@ class NavigationBar(QToolBar):
     def navigate_to_url(self):
         text = self.url_bar.text()
         url = self.get_url(text)
-        self.browser.setUrl(url)    
+        self.browser.setUrl(url)
+        self.url_bar.clearFocus()  # Clear focus after navigating to the URL
 
     def get_url(self, text):
         # Check if the input is a valid URL
@@ -69,7 +73,7 @@ class NavigationBar(QToolBar):
         else:
             # Treat the input as a search query
             return QUrl(f"https://www.google.com/search?q={text.replace(' ', '+')}")
-        
+
     def update_urlbar(self, q):
         if q.toString() == "https://www.google.com/":
             self.url_bar.setText("")
@@ -79,13 +83,12 @@ class NavigationBar(QToolBar):
             self.setup_url_message_timer()
             self.setup_delay_timer()
 
-
     def setup_delay_timer(self):
         self.delay_timer = QTimer(self)
         self.delay_timer.setSingleShot(True)
         self.delay_timer.timeout.connect(self.setup_url_revert_timer)
         self.delay_timer.start(2000)
-        
+
     def open_bookmarks(self):
         print("Bookmarks button clicked")
 
@@ -93,17 +96,24 @@ class NavigationBar(QToolBar):
         self.url_message_timer = QTimer(self)
         self.url_message_timer.timeout.connect(self.display_url_message)
         self.url_message_timer.start(10000)
-    
+
     def display_url_message(self):
         self.url_bar.setText("")
         self.url_bar.setPlaceholderText("sor will never follow you")
-    
+
     def setup_url_revert_timer(self):
         self.url_revert_timer = QTimer(self)
         self.url_revert_timer.timeout.connect(self.revert_url_message)
         self.url_revert_timer.start(10000)
-    
+
     def revert_url_message(self):
         current_url = self.browser.url().toString()
         self.url_bar.setText(current_url)
 
+    def focus_in_event(self, event):
+        self.url_bar.setAlignment(Qt.AlignLeft)  # Align text to the left when focused
+        super(QLineEdit, self.url_bar).focusInEvent(event)
+
+    def focus_out_event(self, event):
+        self.url_bar.setAlignment(Qt.AlignCenter)  # Align text to the center when not focused
+        super(QLineEdit, self.url_bar).focusOutEvent(event)
