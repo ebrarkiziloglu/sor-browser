@@ -1,3 +1,5 @@
+import re
+from urllib.parse import urlparse
 from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit
 from PyQt5.QtCore import QUrl, QSize
 from PyQt5.QtGui import QIcon
@@ -40,12 +42,50 @@ class NavigationBar(QToolBar):
         self.addAction(bookmarks_button)
 
         # URL bar
-        url_bar = QLineEdit('Sor will never follow you...',self)
-        url_bar.setFixedHeight(24)  # Set the height of the URL bar
-        self.addWidget(url_bar)
+        self.url_bar = QLineEdit('',self)
+        self.url_bar.setPlaceholderText("sor will never follow you")
+        self.url_bar.returnPressed.connect(self.navigate_to_url) # search the url bar when return pressed
+        self.url_bar.setFixedHeight(24)  # Set the height of the URL bar
+        self.addWidget(self.url_bar)
 
     def navigate_home(self):
         self.browser.setUrl(QUrl("http://www.google.com"))
+
+    def navigate_to_url(self):
+        # text = self.url_bar.text()
+
+        # if self.is_valid_url(text):
+        #     url = QUrl(text)
+        #     if url.scheme == "":
+        #         url.setScheme("http")
+        # else:
+        #     url = QUrl(f"https://www.google.com/search?q={text.replace(' ', '+')}")
+        # self.browser.setUrl(url)
+
+        # if re.match(r'^(http|https)://', url):  # Check if the input is a URL
+        #     self.browser.setUrl(QUrl(url))
+        # else:
+        #     search_url = f"http://www.google.com/search?q={url}"
+        #     self.browser.setUrl(QUrl(search_url))
+
+        text = self.url_bar.text()
+        url = self.get_url(text)
+        self.browser.setUrl(url)    
+
+    def is_valid_url(self, text):
+        parsed_url = urlparse(text)
+        return bool(parsed_url.scheme and parsed_url.netloc)
+    
+    def get_url(self, text):
+        # Check if the input is a valid URL
+        parsed_url = urlparse(text)
+        if parsed_url.scheme and parsed_url.netloc:
+            return QUrl(text)
+        elif parsed_url.path:  # Handle cases where user enters URL without scheme
+            return QUrl(f"http://{text}")
+        else:
+            # Treat the input as a search query
+            return QUrl(f"https://www.google.com/search?q={text.replace(' ', '+')}")
 
     def open_bookmarks(self):
         print("Bookmarks button clicked")
