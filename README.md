@@ -1,2 +1,2 @@
 # sor-browser
-Son of the Red browser
+Son of Red browser
