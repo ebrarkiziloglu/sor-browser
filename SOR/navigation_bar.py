@@ -1,8 +1,8 @@
-import re
-from urllib.parse import urlparse
-from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit
-from PyQt5.QtCore import QUrl, QSize, QTimer, Qt
+from PyQt5.QtWidgets import QAction, QToolBar, QLineEdit, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QDialog, QPushButton, QListWidget, QToolTip
+from PyQt5.QtCore import QUrl, QSize, QTimer, Qt, QPoint
 from PyQt5.QtGui import QIcon
+from urllib.parse import urlparse
+
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 class NavigationBar(QToolBar):
@@ -10,6 +10,9 @@ class NavigationBar(QToolBar):
     def __init__(self, *args, **kwargs):
         super(NavigationBar, self).__init__(*args, **kwargs)
         self.browser = args[0]
+
+        # Initialize bookmarks list
+        self.bookmarks = []
 
         # Set the height of the toolbar
         self.setFixedHeight(50)
@@ -52,6 +55,12 @@ class NavigationBar(QToolBar):
         self.url_bar.setAlignment(Qt.AlignCenter)  # Center align the URL text initially
         self.url_bar.focusInEvent = self.focus_in_event  # Override focus in event
         self.url_bar.focusOutEvent = self.focus_out_event  # Override focus out event
+
+        # Add bookmark icon to the URL bar
+        self.bookmark_action = QAction(QIcon('icons/addbookmarks.png'), '', self)
+        self.bookmark_action.triggered.connect(self.add_bookmark)
+        self.url_bar.addAction(self.bookmark_action, QLineEdit.TrailingPosition)
+
         self.addWidget(self.url_bar)
 
     def navigate_home(self):
@@ -90,7 +99,30 @@ class NavigationBar(QToolBar):
         self.delay_timer.start(2000)
 
     def open_bookmarks(self):
-        print("Bookmarks button clicked")
+        # Create and show the bookmarks dialog
+        dialog = QDialog()
+        dialog.setWindowTitle("Bookmarks")
+
+        layout = QVBoxLayout()
+        list_widget = QListWidget()
+
+        for bookmark in self.bookmarks:
+            list_widget.addItem(bookmark)
+
+        layout.addWidget(list_widget)
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+    def add_bookmark(self):
+        current_url = self.browser.url().toString()
+        if current_url not in self.bookmarks:
+            self.bookmarks.append(current_url)
+            tooltip_text = f"Added {current_url} to bookmarks."
+        else:
+            tooltip_text = f"{current_url} is already in bookmarks."
+
+        bookmark_pos = self.url_bar.mapToGlobal(self.url_bar.rect().bottomRight())
+        QToolTip.showText(bookmark_pos, tooltip_text, self.url_bar)
 
     def setup_url_message_timer(self):
         self.url_message_timer = QTimer(self)
