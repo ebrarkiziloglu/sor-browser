@@ -1,2 +1,2 @@
 # sor-browser
-Our state-of-the-art browser
+Son of the Red browser
