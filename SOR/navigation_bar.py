@@ -52,36 +52,16 @@ class NavigationBar(QToolBar):
         self.browser.setUrl(QUrl("http://www.google.com"))
 
     def navigate_to_url(self):
-        # text = self.url_bar.text()
-
-        # if self.is_valid_url(text):
-        #     url = QUrl(text)
-        #     if url.scheme == "":
-        #         url.setScheme("http")
-        # else:
-        #     url = QUrl(f"https://www.google.com/search?q={text.replace(' ', '+')}")
-        # self.browser.setUrl(url)
-
-        # if re.match(r'^(http|https)://', url):  # Check if the input is a URL
-        #     self.browser.setUrl(QUrl(url))
-        # else:
-        #     search_url = f"http://www.google.com/search?q={url}"
-        #     self.browser.setUrl(QUrl(search_url))
-
         text = self.url_bar.text()
         url = self.get_url(text)
         self.browser.setUrl(url)    
 
-    def is_valid_url(self, text):
-        parsed_url = urlparse(text)
-        return bool(parsed_url.scheme and parsed_url.netloc)
-    
     def get_url(self, text):
         # Check if the input is a valid URL
         parsed_url = urlparse(text)
         if parsed_url.scheme and parsed_url.netloc:
             return QUrl(text)
-        elif parsed_url.path:  # Handle cases where user enters URL without scheme
+        elif '.' in text:  # Handle cases where user enters URL without scheme
             return QUrl(f"http://{text}")
         else:
             # Treat the input as a search query
