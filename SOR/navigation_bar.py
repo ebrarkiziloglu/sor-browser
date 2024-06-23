@@ -46,6 +46,7 @@ class NavigationBar(QToolBar):
         self.url_bar.setPlaceholderText("sor will never follow you")
         self.url_bar.returnPressed.connect(self.navigate_to_url) # search the url bar when return pressed
         self.url_bar.setFixedHeight(24)  # Set the height of the URL bar
+        self.url_bar.setFixedWidth(1300)  # Set the height of the URL bar
         self.addWidget(self.url_bar)
 
     def navigate_home(self):
